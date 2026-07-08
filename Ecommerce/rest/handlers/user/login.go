@@ -2,7 +2,6 @@ package user
 
 import (
 	"ecommerse/config"
-	"ecommerse/database"
 	"ecommerse/util"
 	"encoding/json"
 	"fmt"
@@ -24,8 +23,8 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := database.Find(reqLogin.Email, reqLogin.Password)
-	if user == nil {
+	user, err := h.userRepo.Find(reqLogin.Email, reqLogin.Password)
+	if err != nil {
 		http.Error(w, "Invalid Credentials", http.StatusBadRequest)
 		return
 	}

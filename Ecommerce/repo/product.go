@@ -1,6 +1,6 @@
-package database
+package repo
 
-var productList []Product
+import "errors"
 
 type Product struct {
 	ID          int     `json:"id"`
@@ -10,44 +10,45 @@ type Product struct {
 	ImgUrl      string  `json:"imageUrl"`
 }
 
-func Store(p Product) Product {
-	p.ID = len(productList) + 1
-	productList = append(productList, p)
-	return p
+type ProductRepo interface {
+	Store(p Product) (*Product, error)
+	Get(productID int) (*Product, error)
+	List() []Product
 }
 
-func List() []Product {
-	return productList
+type productRepo struct {
+	productList []Product
 }
 
-func Get(prodID int) *Product {
-	for _, prod := range productList {
-		if prod.ID == prodID {
-			return &prod
+func NewProductRepo() ProductRepo {
+	repo := &productRepo{}
+
+	generateInitialProducts(repo)
+
+	return repo
+}
+
+func (p *productRepo) Store(product Product) (*Product, error) {
+	product.ID = len(p.productList) + 1
+	p.productList = append(p.productList, product)
+	return &p.productList[len(p.productList)-1], nil
+}
+
+func (p *productRepo) List() []Product {
+	return p.productList
+}
+
+func (p *productRepo) Get(productID int) (*Product, error) {
+	for idx := range p.productList {
+		if p.productList[idx].ID == productID {
+			return &p.productList[idx], nil
 		}
 	}
-	return nil
+
+	return nil, errors.New("product not found")
 }
 
-func Update(product Product) {
-	for idx, prod := range productList {
-		if prod.ID == product.ID {
-			productList[idx] = product
-		}
-	}
-}
-
-func Delete(product Product) {
-	var tempList []Product
-	for idx, prod := range productList {
-		if prod.ID != product.ID {
-			tempList[idx] = prod
-		}
-	}
-	productList = tempList
-}
-
-func init() {
+func generateInitialProducts(p *productRepo) {
 	products := []Product{
 		{
 			ID:          1,
@@ -87,6 +88,6 @@ func init() {
 	}
 
 	for _, product := range products {
-		Store(product)
+		p.productList = append(p.productList, product)
 	}
 }

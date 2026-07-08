@@ -1,7 +1,13 @@
 package review
 
-type Handler struct{}
+import userrepo "ecommerse/repo"
+
+type Handler struct {
+	userRepo userrepo.UserRepo
+}
 
 func NewHandler() *Handler {
-	return &Handler{}
+	return &Handler{
+		userRepo: userrepo.NewUserRepo(),
+	}
 }

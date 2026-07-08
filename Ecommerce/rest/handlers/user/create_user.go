@@ -1,7 +1,7 @@
 package user
 
 import (
-	"ecommerse/database"
+	userrepo "ecommerse/repo"
 	"ecommerse/util"
 	"encoding/json"
 	"fmt"
@@ -9,7 +9,7 @@ import (
 )
 
 func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var newUser database.User
+	var newUser userrepo.User
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&newUser)
 	if err != nil {
@@ -17,6 +17,11 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid Request Data", http.StatusBadRequest)
 		return
 	}
-	createdUser := newUser.Store()
+	createdUser, err := h.userRepo.Store(newUser)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
 	util.SendData(w, createdUser, http.StatusCreated)
 }

@@ -1,7 +1,6 @@
 package product
 
 import (
-	"ecommerse/database"
 	"ecommerse/util"
 	"net/http"
 	"strconv"
@@ -16,8 +15,8 @@ func (h *Handler) GetProductsById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	product := database.Get(pId)
-	if product == nil {
+	product, err := h.productRepo.Get(pId)
+	if err != nil {
 		util.SendError(w, 404, "Product Not Found")
 		return
 	}
